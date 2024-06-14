@@ -1,19 +1,23 @@
 from autoanki.gpt import send, Request, Message, TextContent, ImageUrlContent
 from autoanki.img import get_image
+from autoanki.fc import loads
 
 PROMPT = """\
-Please create 10-20 concise cloze deletion Anki flashcards based on the most important information for a high-school student from the provided lecture. Use the following two examples as general guidelines for the desired format:
+Please create 10-20 concise question type Anki flashcards based on the most important information for a high-school student from the provided lecture. Use the following three examples as general guidelines for the desired format:
 
-The {{c1::olfactory nerve}} is responsible for the sense of {{c2::smell}}; It is the 1st cranial nerve.
+FRONT: For what sense is olfactory nerve responsible?
+BACK: Smell; It is the 1st cranial nerve.
 
-{{c1::Chromosomes}} are organized structures of DNA and proteins found in the {{c2::nucleus}}; They contain many genes, regulatory elements, and intervening sequences.
+FRONT: What are chromosomes and in what are they found in?
+BACK: Chromosomes are organized structures of DNA and proteins found in the nucleus; They contain many genes, regulatory elements, and intervening sequences.
 
-Teorija književnosti dijeli se na nekoliko područja: {{c1::stilistika}}, {{c2::verzifikacija}} (znanost o stihu), {{c3::klasifikacija književnosti}}.
+FRONT: Na koja područja se dijeli teorija književnosti?
+BACK: Stilistika, verzifikacija (znanost o stihu), klasifikacija književnosti.
 
-After each flashcard, if relevant, feel free to use a semicolon and then include any relevant supplementary information (such as definitions, visual aids, high-yield facts, correlations, mnemonics or other relevant information) without using cloze deletion. Flashcards must be in Croatian. Make sure that all key information from the flashcards are cloze deleted.
+On the back of each flashcard, if relevant, feel free to use a semicolon and then include any relevant supplementary information (such as definitions, visual aids, high-yield facts, correlations, mnemonics or other relevant information). Flashcards must be in Croatian.
 """
 
-img = get_image()
+img = get_image(False)
 if not img:
     print("No image, exiting!")
     exit()
@@ -24,10 +28,11 @@ r = send(
         "gpt-4o",
         [
             Message("system", TextContent(PROMPT)),
-            Message("user", ImageUrlContent.from_image(img, "png", "high")),
+            Message("user", ImageUrlContent.from_image(img, "png", "low")),
         ],
         max_tokens=1000,
     ),
 )
 
 print(r)
+flashcards = loads(r.content)
