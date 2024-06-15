@@ -1,6 +1,6 @@
 import dataclasses as dc
 import typing as T
-import genanki
+import genanki as _genanki
 import random
 
 
@@ -13,8 +13,9 @@ class Flashcard:
 def loads(s: str):
     flashcards = []
     for fc in s.split("\n\n"):
+        if fc == "":
+            continue
         front, back = fc.split("\n")[:2]
-        print(f"{front[7:]}/{back[6:]}")
         flashcards.append(Flashcard(front[7:], back[6:]))
     return flashcards
 
@@ -39,7 +40,7 @@ def dump(filename: str, flashcards: T.List[Flashcard]):
 
 
 def genanki(deck_name: str, flashcards: T.List[Flashcard]):
-    model = genanki.Model(
+    model = _genanki.Model(
         random.randint(1000000000, 9999999999),
         "Simple Model",
         fields=[
@@ -55,10 +56,10 @@ def genanki(deck_name: str, flashcards: T.List[Flashcard]):
         ],
     )
 
-    deck = genanki.Deck(random.randint(1000000000, 9999999999), deck_name)
+    deck = _genanki.Deck(random.randint(1000000000, 9999999999), deck_name)
 
     for fc in flashcards:
-        deck.add_note(genanki.Note(model=model, fields=[fc.front, fc.back]))
+        deck.add_note(_genanki.Note(model=model, fields=[fc.front, fc.back]))
 
-    package = genanki.Package([deck])
+    package = _genanki.Package([deck])
     package.write_to_file(f"{deck_name}.apkg")
