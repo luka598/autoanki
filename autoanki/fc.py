@@ -15,6 +15,9 @@ def loads(s: str):
     for fc in s.split("\n\n"):
         if fc == "":
             continue
+        if fc[0] == "#":
+            continue
+
         front, back = fc.split("\n")[:2]
         flashcards.append(Flashcard(front[7:], back[6:]))
     return flashcards
@@ -39,7 +42,9 @@ def dump(filename: str, flashcards: T.List[Flashcard]):
         return f.write(dumps(flashcards))
 
 
-def genanki(deck_name: str, flashcards: T.List[Flashcard]):
+def genanki(
+    deck_name: str, flashcards: T.List[Flashcard], path: T.Optional[str] = None
+):
     model = _genanki.Model(
         random.randint(1000000000, 9999999999),
         "Simple Model",
@@ -56,10 +61,12 @@ def genanki(deck_name: str, flashcards: T.List[Flashcard]):
         ],
     )
 
-    deck = _genanki.Deck(random.randint(1000000000, 9999999999), deck_name)
+    deck = _genanki.Deck(hash(deck_name) % 10000000000, deck_name)
 
     for fc in flashcards:
         deck.add_note(_genanki.Note(model=model, fields=[fc.front, fc.back]))
 
     package = _genanki.Package([deck])
-    package.write_to_file(f"{deck_name}.apkg")
+    if not path:
+        path = f"{deck_name}.apkg"
+    package.write_to_file(path)

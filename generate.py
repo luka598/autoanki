@@ -21,7 +21,13 @@ messages = [
     Message("system", TextContent(PROMPT)),
 ]
 
-while input("end? (y/N): ") != "y":
+if gt := input("General topic: "):
+    messages.append(
+        Message("system", TextContent(gt)),
+    )
+
+images = 0
+while input(f"images: {images} | end? (y/N): ") != "y":
     img = get_image(False)
     if not img:
         print("No image, exiting!")
@@ -35,6 +41,7 @@ while input("end? (y/N): ") != "y":
     messages.append(
         Message("user", ImageUrlContent.from_image(img, "png", detail)),
     )
+    images += 1
 
 
 print("Sending request")
