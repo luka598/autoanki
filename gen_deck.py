@@ -3,8 +3,13 @@ import sys
 
 
 if __name__ == "__main__":
-    print(sys.argv)
-    path_base = sys.argv[1]
-    name = sys.argv[1].split("/")[-1]
-    fcs = load(f"{path_base}.fc")
-    genanki(name, fcs, path=f"{path_base}.apkg")
+    package_path = sys.argv[1]
+    decks = []
+    for path in sys.argv[2:]:
+        if path[-3:] != ".fc":
+            continue
+        name = path.split("/")[-1][:-3]
+        print(f"Processing [{name}]@[{path}]", end="")
+        decks.append((name, load(path)))
+        print(f"| {len(decks[-1][1])} cards loaded")
+    genanki(decks, package_path)

@@ -42,9 +42,7 @@ def dump(filename: str, flashcards: T.List[Flashcard]):
         return f.write(dumps(flashcards))
 
 
-def genanki(
-    deck_name: str, flashcards: T.List[Flashcard], path: T.Optional[str] = None
-):
+def genanki(decks_t: T.List[T.Tuple[str, T.List[Flashcard]]], package_path: str):
     model = _genanki.Model(
         random.randint(1000000000, 9999999999),
         "Simple Model",
@@ -55,18 +53,20 @@ def genanki(
         templates=[
             {
                 "name": "Card 1",
-                "qfmt": "{{Question}}",
+                "qfmt": "<i>{{Deck}}<br></i>{{Question}}",
                 "afmt": '{{FrontSide}}<hr id="answer">{{Answer}}',
             },
         ],
     )
 
-    deck = _genanki.Deck(hash(deck_name) % 10000000000, deck_name)
+    decks = []
 
-    for fc in flashcards:
-        deck.add_note(_genanki.Note(model=model, fields=[fc.front, fc.back]))
+    for name, flashcards in decks_t:
+        deck = _genanki.Deck(hash(name) % 10000000000, name)
+        for fc in flashcards:
+            deck.add_note(_genanki.Note(model=model, fields=[fc.front, fc.back]))
+        decks.append(deck)
 
-    package = _genanki.Package([deck])
-    if not path:
-        path = f"{deck_name}.apkg"
-    package.write_to_file(path)
+    print(decks)
+    package = _genanki.Package(decks)
+    package.write_to_file(package_path)
